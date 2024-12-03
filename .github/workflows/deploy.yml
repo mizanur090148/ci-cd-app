@@ -34,6 +34,6 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: us-east-1 # Replace with your region
       run: |
-    	ssh -o StrictHostKeyChecking=no -i "$KEY" $USER@$HOST "rm -rf /var/www/html/*"
-    	scp -i "$KEY" -r build/* $USER@$HOST:/var/www/html/
+        ssh -o StrictHostKeyChecking=no -i "$KEY" $USER@$HOST "rm -rf /var/www/html/*"
+        scp -i "$KEY" -r build/* $USER@$HOST:/var/www/html/
 
