@@ -48,7 +48,7 @@ jobs:
           chmod 600 ~/.ssh/key.pem
 
           # Add the server to known hosts
-          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+          ssh-keyscan $HOST >> ~/.ssh/known_hosts
 
           # Remove existing files and upload the build
           ssh -i ~/.ssh/key.pem $USER@$HOST "rm -rf /var/www/html/*"
