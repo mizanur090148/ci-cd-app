@@ -14,7 +14,7 @@ function App() {
           rel="noopener noreferrer"
         >
           Learn React
-        </a>
+        </a
         <h2>This is footer area</h2>
       </header>
     </div>
