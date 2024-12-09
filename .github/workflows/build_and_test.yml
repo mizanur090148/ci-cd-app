@@ -36,17 +36,20 @@ jobs:
       # 6. Deploy to Server
       - name: Deploy to Server
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} # Add private key in GitHub secrets
-          HOST: ${{ secrets.HOST }} # Add server host in GitHub secrets
-          USER: ${{ secrets.USER }} # Add server user in GitHub secrets
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOST: ${{ secrets.HOST }}
+          USER: ${{ secrets.USER }}
         run: |
-          # Save the private key
-          echo "$SSH_PRIVATE_KEY" > key.pem
-          chmod 600 key.pem
+          # Create the .ssh directory if it doesn't exist
+          mkdir -p ~/.ssh
 
-          # Add server to known hosts
+          # Save the private key
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/key.pem
+          chmod 600 ~/.ssh/key.pem
+
+          # Add the server to known hosts
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
 
           # Remove existing files and upload the build
-          ssh -i key.pem $USER@$HOST "rm -rf /var/www/html/*"
-          scp -i key.pem -r build/* $USER@$HOST:/var/www/html/
+          ssh -i ~/.ssh/key.pem $USER@$HOST "rm -rf /var/www/html/*"
+          scp -i ~/.ssh/key.pem -r build/* $USER@$HOST:/var/www/html/
