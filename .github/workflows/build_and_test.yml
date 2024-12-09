@@ -1,4 +1,4 @@
-name: Build and Test React App
+name: Build, Test, and Deploy React App
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build and Test
+    name: Build, Test, and Deploy
     runs-on: ubuntu-22.04
 
     steps:
@@ -32,3 +32,21 @@ jobs:
       # 5. Run tests
       - name: Run tests
         run: npm test
+
+      # 6. Deploy to Server
+      - name: Deploy to Server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} # Add private key in GitHub secrets
+          HOST: ${{ secrets.HOST }} # Add server host in GitHub secrets
+          USER: ${{ secrets.USER }} # Add server user in GitHub secrets
+        run: |
+          # Save the private key
+          echo "$SSH_PRIVATE_KEY" > key.pem
+          chmod 600 key.pem
+
+          # Add server to known hosts
+          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+
+          # Remove existing files and upload the build
+          ssh -i key.pem $USER@$HOST "rm -rf /var/www/html/*"
+          scp -i key.pem -r build/* $USER@$HOST:/var/www/html/
