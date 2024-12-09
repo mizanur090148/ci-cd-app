@@ -33,7 +33,7 @@ jobs:
       - name: Run tests
         run: npm test
 
-      # 6. Deploy to Server
+      # 6. Deploy To Server
       - name: Deploy To Server
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
