@@ -14,8 +14,9 @@ function App() {
           rel="noopener noreferrer"
         >
           Learn React
-        </a
+        </a>
         <h2>This is footer area</h2>
+        <h4>{moment().subtract(10, 'days').calendar()}</h4>
       </header>
     </div>
   );
