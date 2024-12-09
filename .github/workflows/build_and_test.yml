@@ -52,12 +52,12 @@ jobs:
           mkdir -p ~/.ssh
 
           # Save the private key
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/key.pem
-          chmod 600 ~/.ssh/key.pem
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-          # Add the server to known hosts
-          ssh-keyscan $HOST >> ~/.ssh/known_hosts
+          # Add the server to known_hosts
+          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
 
           # Remove existing files and upload the build
-          ssh -i ~/.ssh/key.pem $USER@$HOST "rm -rf /var/www/html/*"
-          scp -i ~/.ssh/key.pem -r build/* $USER@$HOST:/var/www/html/
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $USER@$HOST "rm -rf /var/www/html/*"
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -r build/* $USER@$HOST:/var/www/html/
