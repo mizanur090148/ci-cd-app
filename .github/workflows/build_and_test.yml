@@ -40,12 +40,18 @@ jobs:
           HOST: ${{ secrets.HOST }}
           USER: ${{ secrets.USER }}
         run: |
+          # Debug: Check the value of HOST
+          echo "HOST is: $HOST"
+
           # Create the .ssh directory if it doesn't exist
           mkdir -p ~/.ssh
 
           # Save the private key
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/key.pem
           chmod 600 ~/.ssh/key.pem
+
+          # Debug: Check SSH key permissions
+          ls -l ~/.ssh
 
           # Add the server to known hosts
           ssh-keyscan $HOST >> ~/.ssh/known_hosts
