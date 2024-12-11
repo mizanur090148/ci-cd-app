@@ -29,35 +29,35 @@ jobs:
       - name: Build the project
         run: npm run build
 
-      # 5. Run tests
+      # 5. Run test
       - name: Run tests
         run: npm test
 
       # 6. Deploy To Server
-      - name: Deploy To Server
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          HOST: ${{ secrets.HOST }}
-          USER: ${{ secrets.USER }}
-        run: |
-          # Debug: Check if HOST secret is set properly
-          if [ -z "$HOST" ]; then
-            echo "Error: HOST is not set"
-            exit 1
-          else
-            echo "HOST is set to $HOST"
-          fi
+      # - name: Deploy To Server
+      #   env:
+      #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     HOST: ${{ secrets.HOST }}
+      #     USER: ${{ secrets.USER }}
+      #   run: |
+      #     # Debug: Check if HOST secret is set properly
+      #     if [ -z "$HOST" ]; then
+      #       echo "Error: HOST is not set"
+      #       exit 1
+      #     else
+      #       echo "HOST is set to $HOST"
+      #     fi
 
-          # Create the .ssh directory if it doesn't exist
-          mkdir -p ~/.ssh
+      #     # Create the .ssh directory if it doesn't exist
+      #     mkdir -p ~/.ssh
 
-          # Save the private key
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+      #     # Save the private key
+      #     echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+      #     chmod 600 ~/.ssh/id_rsa
 
-          # Add the server to known_hosts
-          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+      #     # Add the server to known_hosts
+      #     ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
 
-          # Remove existing files and upload the build
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $USER@$HOST "rm -rf /var/www/html/*"
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -r build/* $USER@$HOST:/var/www/html/
+      #     # Remove existing files and upload the build
+      #     ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $USER@$HOST "rm -rf /var/www/html/*"
+      #     scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -r build/* $USER@$HOST:/var/www/html/
