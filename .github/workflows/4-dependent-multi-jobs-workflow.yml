@@ -16,8 +16,16 @@ jobs:
 
   second-workflow:
     runs-on: ubuntu-latest
-    needs: [first-workflow]
+    #needs: [first-workflow]
     steps:
       - name: Second Workflow
         run: |
           echo "Hello Second Workflow"
+
+  third-workflow:
+    runs-on: ubuntu-latest
+    needs: [first-workflow, second-workflow]
+    steps:
+      - name: Third Workflow
+        run: |
+          echo "Hello Third Workflow"
