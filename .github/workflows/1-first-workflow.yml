@@ -8,4 +8,7 @@ jobs:
 
     steps:
       - name: First step
-        run: echo "Hello world"
+        run: |
+          echo "1st step"
+          echo "2nd step"
+          echo "3rd step"
