@@ -2,7 +2,7 @@ name: Cron Job Workflow
 
 on:
   schedule:
-    - cron: "*/2 * * *" # every 2 min
+    - cron: "*/2 * * * *" # every 2 minutes
 
 jobs:
   first-workflow:
