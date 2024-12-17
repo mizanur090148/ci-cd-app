@@ -9,6 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Cron Workflows
+      - name: Cron Workflow
         run: |
           echo "Hello cron job"
