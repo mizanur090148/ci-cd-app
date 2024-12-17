@@ -18,6 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [first-workflow]
     steps:
-      - name: First Workflow
+      - name: Second Workflow
         run: |
           echo "Hello Second Workflow"
