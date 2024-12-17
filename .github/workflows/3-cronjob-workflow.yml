@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Cron Workflow
         run: |
-          echo "Hello cron"
+          echo "Hello cron job"
