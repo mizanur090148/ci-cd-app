@@ -1,0 +1,65 @@
+name: Deploy React Frontend to EC2
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the repository
+      - uses: actions/checkout@v2
+
+      # Step 2: Deploy to EC2
+      - name: Deploy to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "$PRIVATE_KEY" > github-ec2.pem && chmod 600 github-ec2.pem
+          ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} '
+          echo "Starting React deployment process..."
+
+          # Ensure Node.js is installed via NVM
+          echo "Installing Node.js via NVM..."
+          if ! command -v nvm &> /dev/null; then
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          fi
+          nvm install node
+
+          # Set repository details
+          REPO_URL="https://github.com/mizanur090148/ci-cd-app.git"
+          BRANCH="main"
+          REPO_DIR="$HOME/react-frontend"
+
+          # Clone or update the repository
+          if [ -d "$REPO_DIR/.git" ]; then
+            echo "Pulling latest changes..."
+            cd "$REPO_DIR"
+            git reset --hard HEAD
+            git pull origin "$BRANCH"
+          else
+            echo "Cloning repository..."
+            git clone "$REPO_URL" "$REPO_DIR"
+            cd "$REPO_DIR"
+          fi
+
+          # Build the React application
+          echo "Building React app..."
+          npm install
+          npm run build
+
+          # Deploy the built files to the appropriate directory
+          DEPLOY_DIR="/var/www/react-frontend"
+          echo "Deploying built files to $DEPLOY_DIR..."
+          sudo mkdir -p $DEPLOY_DIR
+          sudo rm -rf $DEPLOY_DIR/*
+          sudo cp -r build/* $DEPLOY_DIR/
+
+          echo "React deployment complete!"
+          '
+
