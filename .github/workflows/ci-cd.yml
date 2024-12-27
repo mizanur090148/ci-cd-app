@@ -77,19 +77,12 @@ jobs:
           DEPLOY_DIR="/var/www/html/react-frontend"
           BUILD_DIR="/tmp/build"
 
-          # Backup existing files (optional)
-          # if [ -d "$DEPLOY_DIR" ]; then
-          #   echo "Backing up existing deployment..."
-          #   sudo mv "$DEPLOY_DIR" "${DEPLOY_DIR}_backup_$(date +%F-%T)"
-          # fi
-
+          # Clean the target deployment folder
           sudo rm -rf $DEPLOY_DIR/*  # Clear the existing deployment folder
-          sudo rm -rf $DEPLOY_DIR/build  # Remove any existing 'build' directory
 
           # Deploy the build artifact (move only the contents, not the folder itself)
           echo "Deploying files to $DEPLOY_DIR..."
-          sudo mv /tmp/build/* $DEPLOY_DIR/
-          sudo mv $BUILD_DIR/* $DEPLOY_DIR/  # Move only the contents of the build directory
+          sudo mv $BUILD_DIR/* $DEPLOY_DIR/
 
           # Restart Nginx to apply changes
           echo "Restarting Nginx..."
