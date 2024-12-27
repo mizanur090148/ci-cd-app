@@ -75,6 +75,7 @@ jobs:
 
           # Define deployment variables
           DEPLOY_DIR="/var/www/html/react-frontend"
+          BUILD_DIR="/tmp/build"
 
           # Backup existing files (optional)
           # if [ -d "$DEPLOY_DIR" ]; then
@@ -88,6 +89,7 @@ jobs:
           # Deploy the build artifact (move only the contents, not the folder itself)
           echo "Deploying files to $DEPLOY_DIR..."
           sudo mv /tmp/build/* $DEPLOY_DIR/
+          sudo mv $BUILD_DIR/* $DEPLOY_DIR/  # Move only the contents of the build directory
 
           # Restart Nginx to apply changes
           echo "Restarting Nginx..."
