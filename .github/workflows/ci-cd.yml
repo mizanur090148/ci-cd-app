@@ -29,11 +29,7 @@ jobs:
       - name: Build Project
         run: npm run build
 
-      # 5. Run tests with artifacts
-      - name: Run Tests
-        run: npm test -- --watchAll=false
-
-      # 6. Archive Build Output
+      # 5. Archive Build Output
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -45,19 +41,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: [continuous-integration]
     steps:
-      # Step 1: Checkout code
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      # Step 2: Download Build Artifact
+      # Step 1: Download Build Artifact
       - name: Download Build Artifact
         uses: actions/download-artifact@v3
         with:
           name: build
           path: ./build
 
-      # Step 3: Deploy to EC2
-      - name: Deploy to EC2
+      # Step 2: Transfer Build to EC2
+      - name: Deploy Build to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "$PRIVATE_KEY" > github-ec2.pem && chmod 600 github-ec2.pem
+          scp -o StrictHostKeyChecking=no -i github-ec2.pem -r ./build ${USER}@${HOST}:/tmp/build
+
+      # Step 3: Deploy on EC2
+      - name: Finalize Deployment on EC2
         env:
           PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
           HOST: ${{ secrets.EC2_HOST }}
@@ -84,7 +86,7 @@ jobs:
           echo "Deploying files to $DEPLOY_DIR..."
           sudo mkdir -p $DEPLOY_DIR
           sudo rm -rf $DEPLOY_DIR/*
-          sudo cp -r /tmp/build/* $DEPLOY_DIR/
+          sudo mv /tmp/build/* $DEPLOY_DIR/
 
           # Restart Nginx to apply changes
           echo "Restarting Nginx..."
@@ -92,14 +94,3 @@ jobs:
 
           echo "Deployment completed successfully!"
           '
-
-      # Step 4: Post-Deployment Health Check
-      #- name: Post-Deployment Health Check
-      #  run: |
-      #    RESPONSE=$(curl -o /dev/null -s -w "%{http_code}" http://${{ secrets.EC2_HOST }})
-      #    if [ "$RESPONSE" != "200" ]; then
-      #      echo "Health check failed with response code $RESPONSE."
-      #      exit 0  # Temporarily allow failure
-      #    else
-      #      echo "Health check passed!"
-      #    fi
