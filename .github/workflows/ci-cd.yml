@@ -77,10 +77,10 @@ jobs:
           DEPLOY_DIR="/var/www/html/react-frontend"
 
           # Backup existing files (optional)
-          if [ -d "$DEPLOY_DIR" ]; then
-            echo "Backing up existing deployment..."
-            sudo mv "$DEPLOY_DIR" "${DEPLOY_DIR}_backup_$(date +%F-%T)"
-          fi
+          # if [ -d "$DEPLOY_DIR" ]; then
+          #   echo "Backing up existing deployment..."
+          #   sudo mv "$DEPLOY_DIR" "${DEPLOY_DIR}_backup_$(date +%F-%T)"
+          # fi
 
           # Deploy the build artifact
           echo "Deploying files to $DEPLOY_DIR..."
