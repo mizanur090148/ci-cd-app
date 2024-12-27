@@ -1,46 +1,62 @@
-name: Deploy React Frontend to EC2
+name: CI/CD Pipeline for React Frontend
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
-  continuous-intigration:
+  continuous-integration:
     name: Build & Test
     runs-on: ubuntu-22.04
-
     steps:
       # 1. Checkout code
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       # 2. Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18" # Use your desired Node.js version
+          node-version: "18"
+          cache: "npm" # Enable dependency caching
 
       # 3. Install dependencies
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm install
 
       # 4. Build the project
-      - name: Build the project
+      - name: Build Project
         run: npm run build
 
-      # 5. Run tests
-      - name: Run tests
-        run: npm test
+      # 5. Run tests with artifacts
+      - name: Run Tests
+        run: npm test -- --watchAll=false
+
+      # 6. Archive Build Output
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: build/
 
   continuous-deployment:
     name: Deploy to EC2
     runs-on: ubuntu-latest
-    needs: [continuous-intigration]
+    needs: [continuous-integration]
     steps:
-      # Step 1: Checkout the repository
-      - uses: actions/checkout@v2
+      # Step 1: Checkout code
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      # Step 2: Deploy to EC2
+      # Step 2: Download Build Artifact
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: ./build
+
+      # Step 3: Deploy to EC2
       - name: Deploy to EC2
         env:
           PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
@@ -49,46 +65,41 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > github-ec2.pem && chmod 600 github-ec2.pem
           ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} '
-          echo "Starting React deployment process..."
+          echo "Starting deployment process..."
 
-          # Ensure Node.js is installed via NVM
-          echo "Installing Node.js via NVM..."
-          if ! command -v nvm &> /dev/null; then
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-          fi
-          nvm install node
+          # Ensure required dependencies are installed
+          echo "Setting up environment..."
+          sudo apt-get update && sudo apt-get install -y nginx
 
-          # Set repository details
-          REPO_URL="https://github.com/mizanur090148/ci-cd-app.git"
-          BRANCH="main"
-          REPO_DIR="$HOME/react-frontend"
-
-          # Clone or update the repository
-          if [ -d "$REPO_DIR/.git" ]; then
-            echo "Pulling latest changes..."
-            cd "$REPO_DIR"
-            git reset --hard HEAD
-            git pull origin "$BRANCH"
-          else
-            echo "Cloning repository..."
-            git clone "$REPO_URL" "$REPO_DIR"
-            cd "$REPO_DIR"
-          fi
-
-          # Build the React application
-          echo "Building React app..."
-          npm install
-          npm run build
-
-          # Deploy the built files to the appropriate directory
+          # Define deployment variables
           DEPLOY_DIR="/var/www/html/react-frontend"
-          echo "Deploying built files to $DEPLOY_DIR..."
+
+          # Backup existing files (optional)
+          if [ -d "$DEPLOY_DIR" ]; then
+            echo "Backing up existing deployment..."
+            sudo mv "$DEPLOY_DIR" "${DEPLOY_DIR}_backup_$(date +%F-%T)"
+          fi
+
+          # Deploy the build artifact
+          echo "Deploying files to $DEPLOY_DIR..."
           sudo mkdir -p $DEPLOY_DIR
           sudo rm -rf $DEPLOY_DIR/*
-          sudo cp -r build/* $DEPLOY_DIR/
+          sudo cp -r /tmp/build/* $DEPLOY_DIR/
 
-          echo "React deployment complete!"
+          # Restart Nginx to apply changes
+          echo "Restarting Nginx..."
+          sudo systemctl restart nginx
+
+          echo "Deployment completed successfully!"
           '
 
+      # Step 4: Post-Deployment Health Check
+      - name: Post-Deployment Health Check
+        run: |
+          RESPONSE=$(curl -o /dev/null -s -w "%{http_code}" http://${{ secrets.EC2_HOST }})
+          if [ "$RESPONSE" != "200" ]; then
+            echo "Health check failed with response code $RESPONSE."
+            exit 1
+          else
+            echo "Health check passed!"
+          fi
