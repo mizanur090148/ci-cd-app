@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-          cache: "npm"  # Enable dependency caching
+          cache: "npm" # Enable dependency caching
 
       # 3. Install dependencies
       - name: Install Dependencies
@@ -34,8 +34,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build
-          path: build/  # Upload build directory
-          
+          path: build/
+
   continuous-deployment:
     name: Deploy to EC2
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build
-          path: ./build  # Ensure it downloads to './build' directory
+          path: ./build
 
       # Step 2: Transfer Build to EC2
       - name: Deploy Build to EC2
@@ -71,28 +71,29 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > github-ec2.pem && chmod 600 github-ec2.pem
           ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} '
-            echo "Starting deployment process..."
+          echo "Starting deployment process..."
 
-            # Ensure required dependencies are installed
-            echo "Setting up environment..."
-            sudo apt-get update && sudo apt-get install -y nginx
+          # Ensure required dependencies are installed
+          echo "Setting up environment..."
+          sudo apt-get update && sudo apt-get install -y nginx
 
-            # Define deployment variables
-            DEPLOY_DIR="/var/www/html/react-frontend"
-            BUILD_DIR="/tmp/build"
+          # Define deployment variables
+          DEPLOY_DIR="/var/www/html/react-frontend"
+          BUILD_DIR="/tmp/build"
 
-            # Clear the target directory (don't remove the build folder itself, just contents)
-            sudo rm -rf $DEPLOY_DIR/*
+          # Clear the existing deployment folder
+          sudo rm -rf $DEPLOY_DIR/*  # Remove all contents
+          sudo rm -rf $DEPLOY_DIR/build  # Ensure no old build folder exists
 
-            # Deploy the build artifact (move only the contents, not the folder itself)
-            echo "Deploying files to $DEPLOY_DIR..."
-            sudo mv $BUILD_DIR/* $DEPLOY_DIR/  # Move contents, not folder
+          # Deploy the build artifact (move only the contents, not the folder itself)
+          echo "Deploying files to $DEPLOY_DIR..."
+          sudo mv /tmp/build/* $DEPLOY_DIR/
 
-            # Restart Nginx to apply changes
-            echo "Restarting Nginx..."
-            sudo systemctl restart nginx
+          # Restart Nginx to apply changes
+          echo "Restarting Nginx..."
+          sudo systemctl restart nginx
 
-            echo "Deployment completed successfully!"
+          echo "Deployment completed successfully!"
           '
 
       # Step 4: Post-Deployment Health Check
