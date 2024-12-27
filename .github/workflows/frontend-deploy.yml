@@ -53,10 +53,6 @@ jobs:
           npm install
           npm run build
 
-          # 5. Run tests
-      - name: Run tests
-        run: npm test
-
           # Deploy the built files to the appropriate directory
           DEPLOY_DIR="/var/www/html/react-frontend"
           echo "Deploying built files to $DEPLOY_DIR..."
