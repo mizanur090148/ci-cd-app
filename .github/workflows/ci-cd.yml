@@ -76,7 +76,7 @@ jobs:
           # Define deployment variables
           DEPLOY_DIR="/var/www/html/react-frontend"
 
-          Backup existing files (optional)
+          # Backup existing files (optional)
           if [ -d "$DEPLOY_DIR" ]; then
             echo "Backing up existing deployment..."
             sudo mv "$DEPLOY_DIR" "${DEPLOY_DIR}_backup_$(date +%F-%T)"
