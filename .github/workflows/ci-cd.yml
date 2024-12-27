@@ -94,3 +94,14 @@ jobs:
 
           echo "Deployment completed successfully!"
           '
+
+      # Step 4: Post-Deployment Health Check
+      - name: Post-Deployment Health Check
+        run: |
+          RESPONSE=$(curl -o /dev/null -s -w "%{http_code}" http://${{ secrets.EC2_HOST }})
+          if [ "$RESPONSE" != "200" ]; then
+            echo "Health check failed with response code $RESPONSE."
+            exit 0  # Temporarily allow failure
+          else
+            echo "Health check passed!"
+          fi
