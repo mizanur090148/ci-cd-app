@@ -54,7 +54,7 @@ jobs:
           npm run build
 
           # Deploy the built files to the appropriate directory
-          DEPLOY_DIR="/var/www/react-frontend"
+          DEPLOY_DIR="/var/www/html/react-frontend"
           echo "Deploying built files to $DEPLOY_DIR..."
           sudo mkdir -p $DEPLOY_DIR
           sudo rm -rf $DEPLOY_DIR/*
