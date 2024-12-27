@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h4>{'This is my first CI/CD app'}</h4>
+        <h4>{'This is my first CI/CD application'}</h4>
         <h4>{moment().subtract(10, "days").calendar()}</h4>
         <img src={logo} className="App-logo" alt="logo" />
         <p> This is app for development testing </p>
