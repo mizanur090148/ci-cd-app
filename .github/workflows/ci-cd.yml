@@ -55,7 +55,11 @@ jobs:
           HOST: ${{ secrets.EC2_HOST }}
           USER: ${{ secrets.EC2_USER }}
         run: |
-          echo "$PRIVATE_KEY" > github-ec2.pem && chmod 600 github-ec2.pem
+          # Save the private key to a file with proper line breaks
+          echo "$PRIVATE_KEY" > github-ec2.pem
+          chmod 600 github-ec2.pem  # Set correct permissions for the private key
+
+          # Perform SCP transfer (only the files inside the build directory)
           scp -o StrictHostKeyChecking=no -i github-ec2.pem -r ./build/* ${USER}@${HOST}:/tmp/build
 
       # Step 3: Deploy on EC2
