@@ -81,6 +81,12 @@ jobs:
           DEPLOY_DIR="/var/www/html/react-frontend"
           BUILD_DIR="/tmp/build"
 
+          # Create deployment directory if it does not exist
+          if [ ! -d "$DEPLOY_DIR" ]; then
+            echo "$DEPLOY_DIR does not exist. Creating directory..."
+            sudo mkdir -p "$DEPLOY_DIR"
+          fi
+
           # Clear the existing deployment folder
           sudo rm -rf $DEPLOY_DIR/*  # Remove all contents
           sudo rm -rf $DEPLOY_DIR/build  # Ensure no old build folder exists
